@@ -3,31 +3,23 @@
 
 package net.jason13.dangerclose.event;
 
-import com.google.common.eventbus.Subscribe;
 import net.jason13.dangerclose.DangerClose;
 import net.jason13.dangerclose.config.Config;
 import net.jason13.dangerclose.init.Tags;
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.AbstractCandleBlock;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraftforge.event.entity.living.LivingEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.neoforge.event.entity.living.LivingEvent;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static net.minecraft.world.level.block.state.properties.BlockStateProperties.LIT;
 
 @Mod.EventBusSubscriber(modid = DangerClose.MOD_ID)
 public class DangerDetector {
@@ -42,7 +34,7 @@ public class DangerDetector {
         if (Config.ENABLE_DANGER_CLOSE.get()) {
 
             LivingEntity entity = event.getEntity();
-            Level level = entity.getLevel();
+            Level level = entity.level();
             BlockPos pos = entity.blockPosition();
             BlockState blockstate = level.getBlockState(pos);
             BlockState blockstateBelow = level.getBlockState(pos.below());
@@ -92,13 +84,12 @@ public class DangerDetector {
             }
             if (Config.ENABLE_STONECUTTER_DAMAGE.get()) {
                 if (blockstate.getTags().anyMatch(key -> { return key == Tags.Blocks.CUTTING_DANGER;})) {
-                    entity.hurt(DamageSource.CACTUS, 6);
+                    entity.hurt(level.damageSources().cactus(), 6);
                 }
                 else if (blockstateBelow.getTags().anyMatch(key -> { return key == Tags.Blocks.CUTTING_DANGER;})) {
-                    entity.hurt(DamageSource.CACTUS, 6);
+                    entity.hurt(level.damageSources().cactus(), 6);
                 }
             }
         }
     }
-
 }
