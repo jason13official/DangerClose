@@ -1,0 +1,12 @@
+{
+  "required": true,
+  "package": "net.jason13.dangerclose.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+    "CampfireBlockMixin",
+    "MagmaBlockMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
