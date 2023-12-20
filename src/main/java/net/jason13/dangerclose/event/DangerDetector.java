@@ -6,15 +6,14 @@ package net.jason13.dangerclose.event;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
+import java.util.function.BiConsumer;
 
-import crystalspider.soulfired.api.FireManager;
-import crystalspider.soulfired.api.type.FireTyped;
+
 import net.jason13.dangerclose.DangerClose;
 import net.jason13.dangerclose.config.Config;
 import net.jason13.dangerclose.init.Tags;
 import net.jason13.dangerclose.optional.SoulFired;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -33,12 +32,24 @@ public class DangerDetector {
 
     private static final Supplier<Boolean> isSoulfiredInstalled = () -> ModList.get().isLoaded("soulfired");
 
-    private static void setOnFire(Entity entity, ResourceLocation fireType) {
+    private static <T> void setOnFire(Entity entity, T data, BiConsumer<Entity, T> setterOnFire) {
         if (isSoulfiredInstalled.get()) {
-            SoulFired.setOnFire(entity, 2, fireType);
+            setterOnFire.accept(entity, data);
         } else {
             entity.setSecondsOnFire(2);
         }
+    }
+
+    private static void setOnFire(Entity entity, Entity fireTypedEntity) {
+        setOnFire(entity, fireTypedEntity, SoulFired::setOnFire);
+    }
+
+    private static void setOnFire(Entity entity, BlockState fireTypedBlock) {
+        setOnFire(entity, fireTypedBlock, SoulFired::setOnFire);
+    }
+
+    private static void setOnFire(Entity entity, Boolean isSoulFire) {
+        setOnFire(entity, isSoulFire, SoulFired::setOnFire);
     }
 
     @SubscribeEvent
@@ -57,41 +68,41 @@ public class DangerDetector {
 
             for (LivingEntity nearbyEntity : nearby) {
                 if (nearbyEntity.isOnFire()) {
-                    setOnFire(entity, ((FireTyped) nearbyEntity).getFireType());
+                    setOnFire(entity, nearbyEntity);
                 }
                 else if (entity.isOnFire()) {
-                    setOnFire(nearbyEntity, ((FireTyped) entity).getFireType());
+                    setOnFire(nearbyEntity, entity);
                 }
                 nearby_names.add(nearbyEntity.getName().getString());
             }
 
             if (Config.ENABLE_BLAZE_DAMAGE.get() && nearby_names.contains("Blaze")) {
-                setOnFire(entity, FireManager.DEFAULT_FIRE_TYPE);
+                setOnFire(entity, false);
             }
             if (Config.ENABLE_MAGMA_SLIME_DAMAGE.get() && nearby_names.contains("Magma Cube")) {
-                setOnFire(entity, FireManager.DEFAULT_FIRE_TYPE);
+                setOnFire(entity, false);
             }
 
             /* ENTITIES ^ | v BLOCKS */
 
             if (Config.ENABLE_MAGMA_BLOCK_DAMAGE.get()) {
                 if (blockstate.is(Blocks.MAGMA_BLOCK) || blockstateBelow.is(Blocks.MAGMA_BLOCK)) {
-                    setOnFire(entity, FireManager.DEFAULT_FIRE_TYPE);
+                    setOnFire(entity, false);
                 }
             }
             if (Config.ENABLE_TORCH_BURN_DAMAGE.get()) {
                 if (blockstate.getTags().anyMatch(key -> key == Tags.Blocks.TORCH_BURN_DANGER)) {
-                    setOnFire(entity, blockstate.getBlock() == Blocks.SOUL_TORCH ? FireManager.SOUL_FIRE_TYPE : FireManager.DEFAULT_FIRE_TYPE);
+                    setOnFire(entity, blockstate.getBlock() == Blocks.SOUL_TORCH);
                 } else if (blockstateBelow.getTags().anyMatch(key -> key == Tags.Blocks.TORCH_BURN_DANGER)) {
-                    setOnFire(entity, blockstateBelow.getBlock() == Blocks.SOUL_TORCH ? FireManager.SOUL_FIRE_TYPE : FireManager.DEFAULT_FIRE_TYPE);
+                    setOnFire(entity, blockstateBelow.getBlock() == Blocks.SOUL_TORCH);
                 }
             }
             if (Config.ENABLE_CAMPFIRE_BURN_DAMAGE.get()) {
                 if ((blockstate.getTags().anyMatch(key -> key == Tags.Blocks.CAMPFIRE_BURN_DANGER) && blockstate.getValue(BlockStateProperties.LIT))) {
-                    setOnFire(entity, ((FireTyped) blockstate.getBlock()).getFireType());
+                    setOnFire(entity, blockstate);
                 }
                 else if (blockstateBelow.getTags().anyMatch(key -> key == Tags.Blocks.CAMPFIRE_BURN_DANGER) && blockstateBelow.getValue(BlockStateProperties.LIT)) {
-                    setOnFire(entity, ((FireTyped) blockstateBelow.getBlock()).getFireType());
+                    setOnFire(entity, blockstateBelow);
                 }
             }
             if (Config.ENABLE_STONECUTTER_DAMAGE.get()) {
