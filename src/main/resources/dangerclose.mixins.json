@@ -1,7 +1,9 @@
 {
   "required": true,
-  "package": "net.jason13.dangerclose.mixin",
+  "minVersion": "0.8",
   "compatibilityLevel": "JAVA_17",
+  "refmap": "dangerclose.refmap.json",
+  "package": "net.jason13.dangerclose.mixin",
   "mixins": [
     "CampfireBlockMixin",
     "MagmaBlockMixin"

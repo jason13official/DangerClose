@@ -22,7 +22,7 @@ public class MagmaBlockMixin {
      * @reason Disabled damaging entity on Magma Block
      */
     @Inject(method = "stepOn", at = @At(value = "HEAD"), cancellable = true)
-    public void onStepOn(Level pLevel, BlockPos pPos, BlockState pState, Entity pEntity, CallbackInfo ci) {
+    private void onStepOn(Level pLevel, BlockPos pPos, BlockState pState, Entity pEntity, CallbackInfo ci) {
         ci.cancel();
     }
 }
