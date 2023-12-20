@@ -7,8 +7,8 @@ plugins {
 }
 
 mixin { // MIXIN
-    add sourceSets.main, 'mixins.dangerclose.refmap.json'
-    config 'mixins.dangerclose.json'
+    add sourceSets.main, "${mod_id}.refmap.json"
+    config "${mod_id}.mixins.json"
 }
 
 version = mod_version

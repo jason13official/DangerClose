@@ -22,7 +22,7 @@ public abstract class CampfireBlockMixin {
      * @reason Disabled damaging entity inside Campfire Block
      */
     @Inject(method = "entityInside", at = @At(value = "HEAD"), cancellable = true)
-    public void onEntityInside(BlockState state, Level world, BlockPos pos, Entity entity, CallbackInfo ci) {
+    private void onEntityInside(BlockState state, Level world, BlockPos pos, Entity entity, CallbackInfo ci) {
         ci.cancel();
     }
 }
